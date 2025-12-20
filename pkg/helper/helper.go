@@ -12,3 +12,7 @@ func IsAlphaNumeric(input string) (bool, error) {
 
 	return isMatch, nil
 }
+
+func IsAccessible(input string) (bool, error) {
+	return false, nil
+}

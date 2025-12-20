@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 
@@ -29,13 +30,30 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 
 func articleHandler(w http.ResponseWriter, r *http.Request) {
 	name := r.PathValue("name")
-	isValidName, err := helper.IsAlphaNumeric(name)
-	if err != nil || isValidName != true {
-		w.WriteHeader(http.StatusNotAcceptable)
-		w.Write([]byte("error or does not meet validation"))
+	isSanitized, err := helper.IsAlphaNumeric(name)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(fmt.Sprintf("error: %v\n", err)))
 		return
 	}
-	// w.Write([]byte("passes validation for " + name))
+	if isSanitized == false {
+		w.WriteHeader(http.StatusNotAcceptable)
+		w.Write([]byte("Invalid characters in name"))
+		return
+	}
+
+	canAccess, err := helper.IsAccessable(name)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(fmt.Sprintf("error: %v\n", err)))
+		return
+	}
+	if canAccess == false {
+		w.WriteHeader(http.StatusNotAcceptable)
+		w.Write([]byte("Unable to access article"))
+		return
+	}
+
 	http.ServeFile(w, r, "template/index.html")
 
 }
