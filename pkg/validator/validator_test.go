@@ -1,33 +1,35 @@
-package helper
+package validator
 
 import (
+	"os"
+	"path/filepath"
 	"testing"
 )
 
 func TestIsValid(t *testing.T) {
 
 	tests := []struct {
-		name           string
+		description    string
 		input          string
 		expectedOutput bool
 	}{
 		{
-			name:           "alphanumeric",
+			description:    "alphanumeric",
 			input:          "hi8d3Dd",
 			expectedOutput: true,
 		}, {
-			name:           "symbols",
+			description:    "symbols",
 			input:          "hi8d3Dd.#",
 			expectedOutput: false,
 		}, {
-			name:           "space",
+			description:    "space",
 			input:          "hi8d 3Dd",
 			expectedOutput: false,
 		},
 	}
 
 	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+		t.Run(tt.description, func(t *testing.T) {
 			actualOutput, _ := IsAlphaNumeric(tt.input)
 			if tt.expectedOutput != actualOutput {
 				t.Errorf("IsAlphaNumeric() expects %v, got %v", tt.expectedOutput, actualOutput)
@@ -38,29 +40,34 @@ func TestIsValid(t *testing.T) {
 
 func TestIsAccessible(t *testing.T) {
 
+	testDirectory := t.TempDir()
+	fileName := "shouldExist.txt"
+	filePath := filepath.Join(testDirectory, fileName)
+	content := []byte("this is the content of the file")
+	err := os.WriteFile(filePath, content, 0644)
+	if err != nil {
+		t.Fatalf("Unable to set up test case. error: %v", err)
+	}
+
 	tests := []struct {
+		description    string
 		name           string
-		input          string
 		expectedOutput bool
 	}{
 		{
-			name:           "File exists and has content",
-			input:          "hi8d3Dd",
+			description:    "File exists",
+			name:           fileName,
 			expectedOutput: true,
 		}, {
-			name:           "File exists, but is empty",
-			input:          "hi8d3Dd.#",
-			expectedOutput: false,
-		}, {
-			name:           "File does not exist",
-			input:          "hi8d 3Dd",
+			description:    "File does not exist",
+			name:           "shouldNotExist.txt",
 			expectedOutput: false,
 		},
 	}
 
 	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			actualOutput, _ := IsAccessible(tt.input)
+		t.Run(tt.description, func(t *testing.T) {
+			actualOutput, _ := IsAccessible(testDirectory, tt.name)
 			if tt.expectedOutput != actualOutput {
 				t.Errorf("IsAccessible() expects %v, got %v", tt.expectedOutput, actualOutput)
 			}
