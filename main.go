@@ -10,6 +10,12 @@ import (
 	"github.com/tylerBrittain42/blog/pkg/validator"
 )
 
+type article interface {
+	GetFilePath(dir string, name string) (string, error)
+	GetTitle(fileName string) (string, error)
+	GetContent(fileName string) (string, error)
+}
+
 func main() {
 	err := godotenv.Load()
 	if err != nil {

@@ -7,7 +7,22 @@ import (
 	"strings"
 )
 
-func GetTitle(filePath string) (string, error) {
+type BasicArticle struct {
+}
+
+func (BasicArticle) GetFilePath(dir string, name string) (string, error) {
+	ext := ".md"
+	if strings.TrimSpace(name) == "" {
+		return "", errors.New("missing file name")
+	}
+	if !strings.HasSuffix(dir, "/") {
+		dir += "/"
+	}
+	return dir + name + ext, nil
+
+}
+
+func (BasicArticle) GetTitle(filePath string) (string, error) {
 	fileName := filepath.Base(filePath)
 	dotCount := strings.Count(fileName, ".")
 	if dotCount != 1 {
@@ -16,7 +31,7 @@ func GetTitle(filePath string) (string, error) {
 	return strings.Split(fileName, ".")[0], nil
 }
 
-func GetContent(filePath string) (string, error) {
+func (BasicArticle) GetContent(filePath string) (string, error) {
 	dat, err := os.ReadFile(filePath)
 	if err != nil {
 		return "", err

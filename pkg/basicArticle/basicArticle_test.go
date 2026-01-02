@@ -6,6 +6,65 @@ import (
 	"testing"
 )
 
+func TestGetFilePath(t *testing.T) {
+
+	tests := []struct {
+		description    string
+		inputDir       string
+		inputName      string
+		expectedOutput string
+		shouldError    bool
+		errorMessage   string
+	}{
+		{
+			description:    "no changes needed",
+			inputDir:       "usr/",
+			inputName:      "art1",
+			expectedOutput: "usr/art1.md",
+			shouldError:    false,
+			errorMessage:   "",
+		}, {
+			description:    "missing slash",
+			inputDir:       "usr",
+			inputName:      "art1",
+			expectedOutput: "usr/art1.md",
+			shouldError:    false,
+			errorMessage:   "",
+		}, {
+			description:    "missing name",
+			inputDir:       "usr/",
+			inputName:      "",
+			expectedOutput: "",
+			shouldError:    true,
+			errorMessage:   "missing file name",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.description, func(t *testing.T) {
+			art := BasicArticle{}
+			actualOutput, err := art.GetFilePath(tt.inputDir, tt.inputName)
+			if tt.shouldError {
+				if err == nil {
+					t.Fatal("GetFilePath() did not recieve an error when expected")
+				}
+				if err.Error() != tt.errorMessage {
+					t.Errorf("GetFilePath() recieved error '%v', but wanted error '%v'", err, tt.errorMessage)
+				}
+				if tt.expectedOutput != actualOutput {
+					t.Errorf("GetFilePath() recieved response %v when an error was expected", actualOutput)
+				}
+			} else {
+				if err != nil {
+					t.Errorf("GetFilePath() recieved an unexpected error: %v", err)
+				}
+				if tt.expectedOutput != actualOutput {
+					t.Errorf("GetFilePath() expects %v, got %v", tt.expectedOutput, actualOutput)
+				}
+			}
+		})
+	}
+}
 func TestGetTitle(t *testing.T) {
 
 	tests := []struct {
@@ -50,7 +109,8 @@ func TestGetTitle(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			actualOutput, err := GetTitle(tt.input)
+			art := BasicArticle{}
+			actualOutput, err := art.GetTitle(tt.input)
 			if tt.shouldError {
 				if err == nil {
 					t.Fatal("GetTitle() did not recieve an error when expected")
@@ -122,6 +182,7 @@ func TestGetContent(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
+			art := BasicArticle{}
 			path := filepath.Join(tmpDir, tt.fileName)
 			if tt.createFile {
 				if err := os.MkdirAll(filepath.Dir(path), 0755); err != nil {
@@ -132,7 +193,7 @@ func TestGetContent(t *testing.T) {
 				}
 			}
 
-			actualOutput, err := GetContent(path)
+			actualOutput, err := art.GetContent(path)
 			if tt.shouldError {
 				if err == nil {
 					t.Fatal("GetContent() did not recieve an error when expected")
