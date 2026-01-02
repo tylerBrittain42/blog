@@ -16,6 +16,15 @@ func GetTitle(filePath string) (string, error) {
 	return strings.Split(fileName, ".")[0], nil
 }
 
-func GetContent(fileName string) (string, error) {
-	return "", nil
+func GetContent(filePath string) (string, error) {
+	dat, err := os.ReadFile(filePath)
+	if err != nil {
+		return "", err
+	}
+	text := strings.TrimSpace(string(dat))
+	if len(text) == 0 {
+		return "", errors.New("no content found")
+	}
+
+	return text, nil
 }
