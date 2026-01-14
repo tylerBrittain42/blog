@@ -13,6 +13,17 @@ type ArticleCreator interface {
 	GetContent(fileName string) (string, error)
 }
 
+type ArticleInfo struct {
+	Title string
+	Link  string
+}
+
+func GetArticleList(dir string) ([]ArticleInfo, error) {
+	a1 := ArticleInfo{Title: "this is first", Link: "google.com"}
+	te := []ArticleInfo{a1}
+	return te, nil
+}
+
 func GetTemplate(a ArticleCreator, templateDir, name string) ([]byte, error) {
 	type article struct {
 		Title   string

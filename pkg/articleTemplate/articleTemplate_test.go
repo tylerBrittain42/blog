@@ -3,6 +3,9 @@ package articleTemplate
 import (
 	"errors"
 	"os"
+	"path/filepath"
+	"reflect"
+	"sort"
 	"strings"
 	"testing"
 )
@@ -150,3 +153,96 @@ func TestGetTemplate(t *testing.T) {
 		}
 	})
 }
+
+func sliceIsEqual(a, b []ArticleInfo) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	// The order of elements from reading a directory is not guaranteed.
+	// To have a consistent comparison, we sort both slices by Title.
+	sort.Slice(a, func(i, j int) bool {
+		return a[i].Title < a[j].Title
+	})
+	sort.Slice(b, func(i, j int) bool {
+		return b[i].Title < b[j].Title
+	})
+
+	return reflect.DeepEqual(a, b)
+}
+
+func TestGetArticleList(t *testing.T) {
+	cases := []struct {
+		name          string
+		filesToCreate []string
+		expected      []ArticleInfo
+		expectErr     bool
+		useInvalidDir bool
+	}{
+		{
+			name:          "empty directory",
+			filesToCreate: []string{},
+			expected:      []ArticleInfo{},
+			expectErr:     false,
+		},
+		{
+			name:          "one file",
+			filesToCreate: []string{"test.md"},
+			expected:      []ArticleInfo{{Title: "test", Link: "articles/test"}},
+			expectErr:     false,
+		},
+		{
+			name:          "multiple files",
+			filesToCreate: []string{"test1.md", "test2.html"},
+			expected: []ArticleInfo{
+				{Title: "test1", Link: "articles/test1"},
+				{Title: "test2", Link: "articles/test2"},
+			},
+			expectErr: false,
+		},
+		{
+			name:          "non-existent directory",
+			useInvalidDir: true,
+			expectErr:     true,
+		},
+		{
+			name:          "ignore dot files",
+			filesToCreate: []string{".DS_Store", "test1.md"},
+			expected:      []ArticleInfo{{Title: "test1", Link: "articles/test1"}},
+			expectErr:     false,
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			var dir string
+			if tc.useInvalidDir {
+				dir = "non-existent-dir"
+			} else {
+				dir = t.TempDir()
+				for _, fileName := range tc.filesToCreate {
+					if err := os.WriteFile(filepath.Join(dir, fileName), []byte("content"), 0644); err != nil {
+						t.Fatalf("failed to create file: %v", err)
+					}
+				}
+			}
+
+			result, err := GetArticleList(dir)
+
+			if tc.expectErr {
+				if err == nil {
+					t.Fatal("expected an error but got nil")
+				}
+				return
+			}
+
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
+
+			if !sliceIsEqual(result, tc.expected) {
+				t.Errorf("expected %+v, got %+v", tc.expected, result)
+			}
+		})
+	}
+}
+

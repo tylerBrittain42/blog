@@ -9,7 +9,14 @@ import (
 	"github.com/tylerBrittain42/blog/pkg/validator"
 )
 
-func (cfg *config) generalArticleHandler(w http.ResponseWriter, r *http.Request) {
+func (cfg *config) tableOfContentsHandler(w http.ResponseWriter, r *http.Request) {
+	articles, err := articleTemplate.GetArticleList(cfg.templateDir)
+	log.Println(articles)
+	log.Println(articles[0].Title)
+	if err != nil {
+		respondWithError(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 	http.ServeFile(w, r, "template/toc.html")
 }
 
