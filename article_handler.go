@@ -9,8 +9,18 @@ import (
 	"github.com/tylerBrittain42/blog/pkg/validator"
 )
 
-func (cfg *config) generalArticleHandler(w http.ResponseWriter, r *http.Request) {
-	http.ServeFile(w, r, "template/toc.html")
+func (cfg *config) tableOfContentsHandler(w http.ResponseWriter, r *http.Request) {
+	tocBytes, err := articleTemplate.CreateToc(cfg.templateDir)
+	if err != nil {
+		respondWithError(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	_, err = w.Write(tocBytes)
+	if err != nil {
+		log.Printf("Unable to write tocBytes:, %v\n", err)
+	}
+
 }
 
 func (cfg *config) specificArticleHandler(w http.ResponseWriter, r *http.Request) {

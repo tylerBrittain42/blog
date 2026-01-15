@@ -8,12 +8,6 @@ import (
 	"github.com/joho/godotenv"
 )
 
-type articleCreator interface {
-	GetFilePath(dir string, name string) (string, error)
-	GetTitle(fileName string) (string, error)
-	GetContent(fileName string) (string, error)
-}
-
 func main() {
 	err := godotenv.Load()
 	if err != nil {
@@ -29,7 +23,10 @@ func main() {
 	cfg := config{templateDir: os.Getenv("DIR")}
 
 	mux.HandleFunc("/", indexHandler)
-	mux.HandleFunc("GET /article/", cfg.generalArticleHandler)
+	mux.HandleFunc("/toc", cfg.tableOfContentsHandler)
+	mux.HandleFunc("GET /article/", func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, "/toc", http.StatusTemporaryRedirect)
+	})
 	mux.HandleFunc("GET /article/{name}", cfg.specificArticleHandler)
 
 	log.Printf("Serving on port %s\n", port)

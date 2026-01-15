@@ -7,8 +7,13 @@
 </head>
 <body>
     <h1>Table of Contents</h1>
-    <p>This is a stand in for the table of contents</p>
+    <p>List below</p>
 
+    <ul>
+    {{range .}}
+        <li><a href="article/{{.}}">{{.}}</a></li>
+    {{end}}
+    </ul>
     
 </body>
 </html>
