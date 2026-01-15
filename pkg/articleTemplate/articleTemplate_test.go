@@ -198,7 +198,7 @@ func TestCreateToc(t *testing.T) {
 
     <ul>
     {{range .}}
-        <li>{{.}}</li>
+        <li><a href="article/{{.}}">{{.}}</a></li>
     {{end}}
     </ul>
     
@@ -222,11 +222,11 @@ func TestCreateToc(t *testing.T) {
 		}
 
 		resultStr := string(result)
-		if !strings.Contains(resultStr, "<li>article1</li>") {
-			t.Errorf("expected result to contain '<li>article1</li>', got: %s", resultStr)
+		if !strings.Contains(resultStr, `<a href="article/article1">article1</a>`) {
+			t.Errorf("expected result to contain '<a href=\"article/article1\">article1</a>', got: %s", resultStr)
 		}
-		if !strings.Contains(resultStr, "<li>article2</li>") {
-			t.Errorf("expected result to contain '<li>article2</li>', got: %s", resultStr)
+		if !strings.Contains(resultStr, `<a href="article/article2">article2</a>`) {
+			t.Errorf("expected result to contain '<a href=\"article/article2\">article2</a>', got: %s", resultStr)
 		}
 		if !strings.Contains(resultStr, "<h1>Table of Contents</h1>") {
 			t.Errorf("expected result to contain '<h1>Table of Contents</h1>', got: %s", resultStr)
