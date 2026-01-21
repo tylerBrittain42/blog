@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/joho/godotenv"
+	"github.com/tylerBrittain42/blog/internal/templates"
 )
 
 func main() {
@@ -35,7 +36,13 @@ func main() {
 }
 
 func indexHandler(w http.ResponseWriter, r *http.Request) {
-	http.ServeFile(w, r, "template/index.html")
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	component := templates.Article("speed", "doog")
+	if err := component.Render(r.Context(), w); err != nil {
+		log.Printf("render error: %v", err)
+		http.Error(w, "Render failed", http.StatusInternalServerError)
+		return
+	}
 }
 
 type config struct {
