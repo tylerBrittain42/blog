@@ -1,0 +1,36 @@
+name: Release on Push to Main
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write  #
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.23'
+
+
+        id: tagger
+        run: |
+          tag="v$(date +'%Y-%m-%d-%H-%M-%S')"
+          echo "tag=$tag" >> $GITHUB_OUTPUT
+          git tag $tag
+          git push origin $tag
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.tagger.outputs.tag }}
+          name: Release ${{ steps.tagger.outputs.tag }}
+          files: dist/*
